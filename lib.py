@@ -39,9 +39,12 @@ class PytorchMetricLearningTask:
         self.inference_model = None
         self.threshold = None
 
-    def setup_task(self, train_dataset, val_dataset):
+    def setup_task(self, train_dataset, val_dataset, train_df, val_df, combined_df):
         self.train_dataset = train_dataset
         self.val_dataset = val_dataset
+        self.train_df = train_df
+        self.val_df = val_df
+        self.combined_df = combined_df
         self.dataset_dict = {"train": train_dataset, "val": val_dataset}
 
         self.trunk, self.embedder = self.get_model_()
@@ -70,9 +73,13 @@ class PytorchMetricLearningTask:
         if self.threshold is None:
             raise Exception('Threshold for prediction not defined')
         self.setup_inference_(database)
-        distances, indices = self.infer_(x_dataset)
+        distances, indices, _ = self.infer_(x_dataset)
 
-        results = []
+        new_whale_idx = -1
+
+        combined_idx_lookup = self.combined_df['individual_id'].copy().to_dict()
+        combined_idx_lookup[-1] = 'new_individual'
+
         prediction_list = []
         for i in range(len(distances)):
             pred_knn_idx = indices[i, :].copy()
@@ -95,12 +102,13 @@ class PytorchMetricLearningTask:
         prediction_df = pd.DataFrame(prediction_list)
         return prediction_df
 
-    def validation_step(self, evaluate_threshold=False) -> list:
-        predictions = self.predict(self.train_dataset, self.val_dataset)
-        valid_distances = None
+    def validation_step(self) -> list:
+        self.setup_inference_(self.train_dataset)
+        threshold, results_df = self.evaluate_threshold()
+        self.threshold = threshold
+        val_metrics = results_df.loc[:5, 'map5']
 
-
-        return list
+        return list(val_metrics)
 
     def evaluate_threshold(self):
         val_distances, val_indices, val_labels = self.infer_(self.val_dataset, return_labels=True)
