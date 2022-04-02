@@ -4,8 +4,8 @@ import abc
 @dataclass
 class BaseConfigClass:
     # files
-    train_dir = '../input/happywhale-cropped-dataset-yolov5-ds/train_images'
-    test_dir = '../input/happywhale-cropped-dataset-yolov5-ds/test_images'
+    train_dir = '../input/happywhale-cropped-dataset-yolov5-ds/train_images/train_images'
+    test_dir = '../input/happywhale-cropped-dataset-yolov5-ds/test_images/test_images'
     train_csv = '../input/happy-whale-and-dolphin/train.csv'
     test_csv = '../input/happy-whale-and-dolphin/sample_submission.csv'
     # model
