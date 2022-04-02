@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 import torch
 
-import lib, data
+import lib
+import data
 from configs import baseline_config as config
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

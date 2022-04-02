@@ -16,8 +16,8 @@ from pytorch_metric_learning.utils.inference import InferenceModel
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from two_guys_one_competition_sad_dolphine.configs import BaseConfigClass
-from two_guys_one_competition_sad_dolphine.data import HappyWhaleDataset
+from configs import BaseConfigClass
+from data import HappyWhaleDataset
 
 TEST_SIZE = 0.05
 
