@@ -57,8 +57,7 @@ class PytorchMetricLearningTask:
         self.trainer = self.get_trainer_()
 
     def train(self, n_epoch):
-        print(self.trainer, n_epoch)
-        self.trainer.train(n_epoch)
+        self.trainer.train(num_epochs=n_epoch)
 
     def load_models(self, checkpoint_name):
         '''
