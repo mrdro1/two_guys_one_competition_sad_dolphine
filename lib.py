@@ -1,4 +1,5 @@
 import glob
+import sys
 
 import pandas as pd
 import numpy as np
@@ -133,7 +134,11 @@ class PytorchMetricLearningTask:
 
                 predicted_label_list = []
                 for predicted_idx in pred_knn_idx:
-                    predicted_label = train_idx_lookup[predicted_idx]
+                    try:
+                        predicted_label = train_idx_lookup[predicted_idx]
+                    except Exception as e:
+                        print(predicted_idx)
+                        sys.exit(-1)
                     if len(predicted_label_list) == 5:
                         break
                     if (predicted_label == 'new_individual') | (predicted_label not in predicted_label_list):
