@@ -1,3 +1,4 @@
+import click
 import numpy as np
 import pandas as pd
 import torch
@@ -6,37 +7,45 @@ import lib
 import data
 from configs import baseline_config as config
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-print(device)
-np.random.seed(config.seed)
-torch.manual_seed(config.seed)
 
-# Data preparations
-df = lib.load_df(config.train_csv)
-train_df, val_df = lib.train_test_split_impl(df, config.seed)
-# TODO assert shape
-train_dataset = data.HappyWhaleDataset(df=train_df, image_dir=config.train_dir, return_labels=True)
-val_dataset = data.HappyWhaleDataset(df=val_df, image_dir=config.train_dir, return_labels=True)
+@click.command()
+@click.option('-e', 'epochs', default=10)
+def main(epochs):
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print(device)
+    np.random.seed(config.seed)
+    torch.manual_seed(config.seed)
 
-task = lib.PytorchMetricLearningTask(config, device)
-task.setup_task(train_dataset, val_dataset, train_df, val_df, df)
+    # Data preparations
+    df = lib.load_df(config.train_csv)
+    train_df, val_df = lib.train_test_split_impl(df, config.seed)
+    # TODO assert shape
+    train_dataset = data.HappyWhaleDataset(df=train_df, image_dir=config.train_dir, return_labels=True)
+    val_dataset = data.HappyWhaleDataset(df=val_df, image_dir=config.train_dir, return_labels=True)
 
-task.train(config.n_epochs)
+    task = lib.PytorchMetricLearningTask(config, device)
+    task.setup_task(train_dataset, val_dataset, train_df, val_df, df)
 
-task.load_models('best')
-val_metric = task.validation_step()
-print(val_metric)
+    task.train(epochs)
 
-test_df = pd.read_csv(config.test_csv)
-train_dataset = data.HappyWhaleDataset(df=df, image_dir=config.train_dir, return_labels=True)
-test_dataset = data.HappyWhaleDataset(df=test_df, image_dir=config.train_dir, return_labels=True)
+    task.load_models('best')
+    val_metric = task.validation_step()
+    print(val_metric)
 
-y_predictions = task.predict(train_dataset, test_dataset)
+    test_df = pd.read_csv(config.test_csv)
+    train_dataset = data.HappyWhaleDataset(df=df, image_dir=config.train_dir, return_labels=True)
+    test_dataset = data.HappyWhaleDataset(df=test_df, image_dir=config.train_dir, return_labels=True)
 
-y_predictions['predictions'] = y_predictions[0].astype(str) + ' ' + y_predictions[1].astype(str) + ' ' +\
-                               y_predictions[2].astype(str) + ' ' + y_predictions[3].astype(str) + ' ' +\
-                               y_predictions[4].astype(str)
+    y_predictions = task.predict(train_dataset, test_dataset)
 
-submission = pd.read_csv(config.test_csv)
-submission['predictions'] = y_predictions['predictions']
-submission.to_csv('submission.csv', index=False)
+    y_predictions['predictions'] = y_predictions[0].astype(str) + ' ' + y_predictions[1].astype(str) + ' ' +\
+                                   y_predictions[2].astype(str) + ' ' + y_predictions[3].astype(str) + ' ' +\
+                                   y_predictions[4].astype(str)
+
+    submission = pd.read_csv(config.test_csv)
+    submission['predictions'] = y_predictions['predictions']
+    submission.to_csv('submission.csv', index=False)
+
+
+if __name__ == "__main__":
+    main()
