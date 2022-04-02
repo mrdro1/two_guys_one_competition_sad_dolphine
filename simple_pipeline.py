@@ -7,12 +7,15 @@ import data
 from configs import baseline_config as config
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(device)
 np.random.seed(config.seed)
 torch.manual_seed(config.seed)
 
 # Data preparations
 df = lib.load_df(config.train_csv)
+print(len(df))
 train_df, val_df = lib.train_test_split_impl(df, config.seed)
+print(len(train_df), len(val_df))
 # TODO assert shape
 train_dataset = data.HappyWhaleDataset(df=train_df, image_dir=config.train_dir, return_labels=True)
 val_dataset = data.HappyWhaleDataset(df=val_df, image_dir=config.train_dir, return_labels=True)
